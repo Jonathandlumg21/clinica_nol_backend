@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Usuario {
+  id            Int       @id @default(autoincrement())
+  nombre        String    @db.VarChar(120)
+  email         String    @unique @db.VarChar(120)
+  password_hash String    @db.Text
+  rol           String    @db.VarChar(20)
+  activo        Boolean   @default(true)
+  creado_en     DateTime  @default(now())
+
+  pacientes_medico  Paciente[]  @relation("MedicoPaciente")
+  pacientes_creados Paciente[]  @relation("CreadorPaciente")
+  diagnosticos      Diagnostico[]
+  tratamientos      Tratamiento[]
+  consultas         Consulta[]
+
+  @@map("usuarios")
+}
+
+model Paciente {
+  id               Int       @id @default(autoincrement())
+  nombre           String    @db.VarChar(100)
+  apellido         String    @db.VarChar(100)
+  fecha_nacimiento DateTime? @db.Date
+  sexo             String?   @db.VarChar(20)
+  telefono         String?   @db.VarChar(30)
+  direccion        String?   @db.Text
+  id_medico        Int?
+  id_creador       Int?
+  creado_en        DateTime  @default(now())
+  actualizado_en   DateTime  @default(now())
+
+  medico       Usuario?     @relation("MedicoPaciente",  fields: [id_medico],  references: [id], onDelete: SetNull)
+  creador      Usuario?     @relation("CreadorPaciente", fields: [id_creador], references: [id], onDelete: SetNull)
+  diagnosticos Diagnostico[]
+  tratamientos Tratamiento[]
+  consultas    Consulta[]
+
+  @@map("pacientes")
+}
+
+model Diagnostico {
+  id          Int       @id @default(autoincrement())
+  id_paciente Int
+  enfermedad  String    @db.VarChar(200)
+  descripcion String?   @db.Text
+  fecha       DateTime? @db.Date
+  id_medico   Int?
+  creado_en   DateTime  @default(now())
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id], onDelete: Cascade)
+  medico   Usuario? @relation(fields: [id_medico],   references: [id], onDelete: SetNull)
+
+  @@map("diagnosticos")
+}
+
+model Tratamiento {
+  id           Int       @id @default(autoincrement())
+  id_paciente  Int
+  descripcion  String    @db.Text
+  medicamento  String?   @db.VarChar(200)
+  dosis        String?   @db.VarChar(100)
+  fecha_inicio DateTime? @db.Date
+  fecha_fin    DateTime? @db.Date
+  activo       Boolean   @default(true)
+  id_medico    Int?
+  creado_en    DateTime  @default(now())
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id], onDelete: Cascade)
+  medico   Usuario? @relation(fields: [id_medico],   references: [id], onDelete: SetNull)
+
+  @@map("tratamientos")
+}
+
+model Consulta {
+  id          Int       @id @default(autoincrement())
+  id_paciente Int
+  id_medico   Int?
+  fecha       DateTime  @default(now())
+  motivo      String?   @db.Text
+  notas       String?   @db.Text
+  peso_kg     Decimal?  @db.Decimal(5, 2)
+  presion     String?   @db.VarChar(20)
+  temperatura Decimal?  @db.Decimal(4, 1)
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id], onDelete: Cascade)
+  medico   Usuario? @relation(fields: [id_medico],   references: [id], onDelete: SetNull)
+
+  @@map("consultas")
+}
