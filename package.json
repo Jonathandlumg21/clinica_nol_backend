@@ -4,11 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
-    "test": "echo \"Error: no test specified\" && exit 1",
-=======
-    "test": "echo \"Error: no test specified\" && exit 1"
->>>>>>> 230d8c96ae9f57e45d4f5465762a0c5bf17f44c8
     "start": "npx prisma generate && node index.js"
   },
   "keywords": [],
